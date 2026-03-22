@@ -1,5 +1,8 @@
 """Test the XOR cipher -- symmetric bitwise encryption."""
 
+import pytest
+
+from pycrypt.errors import PyCryptError
 from pycrypt.xor import xor_encrypt, xor_encrypt_bytes
 
 
@@ -42,6 +45,11 @@ class TestXorEncrypt:
         result_a = xor_encrypt("hello", "key")
         result_b = xor_encrypt("hello", "key")
         assert result_a == result_b
+
+    def test_empty_key_raises(self) -> None:
+        """Verify an empty key raises PyCryptError."""
+        with pytest.raises(PyCryptError):
+            xor_encrypt("data", "")
 
 
 class TestXorEncryptBytes:

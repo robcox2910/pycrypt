@@ -7,6 +7,8 @@ repeats if it's shorter than the message.
 This is the foundation of almost all modern encryption.
 """
 
+from pycrypt.errors import PyCryptError
+
 
 def xor_encrypt(data: str, key: str) -> bytes:
     """Encrypt (or decrypt) data using XOR with a repeating key.
@@ -42,5 +44,8 @@ def xor_encrypt_bytes(data: bytes, key: bytes) -> bytes:
 
 def _xor_bytes(data: bytes, key: bytes) -> bytes:
     """XOR each byte of data with a repeating key."""
+    if len(key) == 0:
+        msg = "Key must not be empty"
+        raise PyCryptError(msg)
     key_len = len(key)
     return bytes(b ^ key[i % key_len] for i, b in enumerate(data))

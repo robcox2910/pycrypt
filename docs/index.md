@@ -48,10 +48,8 @@ king, and you know no one opened it.
 | **Hashing** | Meat grinder | One-way fingerprints (can't reverse) |
 | **Caesar Cipher** | Secret decoder ring | Shift letters to hide a message |
 | **XOR Cipher** | Flip a switch | Fast bit-level encryption |
-| **Symmetric Encryption** | Padlock with one key | Same key to lock and unlock |
 | **Key Derivation** | Recipe from simple ingredients | Turn a password into a strong key |
 | **HMAC** | Tamper-evident seal | Prove a message wasn't changed |
-| **Asymmetric Encryption** | Mailbox (public slot, private door) | Different keys to lock and unlock |
 | **Digital Signatures** | Wax seal on a letter | Prove who sent it |
 
 ## Let's Start!

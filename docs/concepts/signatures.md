@@ -18,22 +18,27 @@ proven:
 - **Authenticity** -- only the private key holder could have signed it
 - **Integrity** -- the message hasn't been changed since signing
 
+Our simplified version uses one key for both signing and verifying
+(like a shared stamp). Real systems like RSA use separate private/public
+keys -- that requires advanced math we'll learn later.
+
 ## Signatures in PyCrypt
 
 ```python
-from pycrypt.signatures import generate_keypair, sign, verify
+import os
+from pycrypt.signatures import sign, verify
 
-# Generate a key pair (private ring + public pattern).
-private_key, public_key = generate_keypair()
+# Create a shared secret key.
+key = os.urandom(32)
 
-# Sign a message with the private key.
-signature = sign("I approve this transfer", private_key)
+# Sign a message with the key.
+signature = sign("I approve this transfer", key)
 
-# Anyone can verify with the public key.
-verify("I approve this transfer", signature, public_key)
+# Verify with the same key.
+verify("I approve this transfer", signature, key)
 # True
 
-verify("I approve a DIFFERENT transfer", signature, public_key)
+verify("I approve a DIFFERENT transfer", signature, key)
 # False -- message was changed!
 ```
 

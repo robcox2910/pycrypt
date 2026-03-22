@@ -30,10 +30,10 @@ from pycrypt.xor import xor_encrypt
 
 # Encrypt
 ciphertext = xor_encrypt("Hello!", key="secret")
-
-# Decrypt (same function, same key)
-plaintext = xor_encrypt(ciphertext, key="secret")
-# "Hello!"
+# To decrypt, XOR the bytes again:
+from pycrypt.xor import xor_encrypt_bytes
+plaintext_bytes = xor_encrypt_bytes(ciphertext, b"secret")
+plaintext = plaintext_bytes.decode("utf-8")  # "Hello!"
 ```
 
 ## Why XOR Matters
