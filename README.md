@@ -61,13 +61,14 @@ XOR is its own inverse -- encrypt and decrypt use the exact same operation.
 This is the foundation of modern encryption.
 
 ```python
-from pycrypt.xor import xor_encrypt
+from pycrypt.xor import xor_encrypt, xor_encrypt_bytes
 
 encrypted = xor_encrypt("secret message", key="mykey")
 print(encrypted)  # looks like random bytes
 
 # Decrypt by XOR-ing again with the same key
-decrypted_bytes = xor_encrypt("secret message", key="mykey")
+decrypted = xor_encrypt_bytes(encrypted, b"mykey").decode("utf-8")
+print(decrypted)  # "secret message"
 ```
 
 ### HMAC -- Tamper-Evident Seals
@@ -137,14 +138,17 @@ Full documentation with kid-friendly explanations of every concept:
 
 PyCrypt is part of a series of educational "build it from scratch" projects:
 
-| Project | What it builds |
-|---------|---------------|
-| [PyOS](https://github.com/robcox2910/pyos) | An operating system |
-| [Pebble](https://github.com/robcox2910/pebble) | A database engine |
-| [PyDB](https://github.com/robcox2910/pydb) | A SQL database |
-| [PyStack](https://github.com/robcox2910/pystack) | A network stack |
-| [PyWeb](https://github.com/robcox2910/pyweb) | An HTTP framework |
-| [PyGit](https://github.com/robcox2910/pygit) | A version control system |
+| Project | What It Teaches |
+|---------|----------------|
+| [PyOS](https://github.com/robcox2910/py-os) | Operating systems |
+| [Pebble](https://github.com/robcox2910/pebble-lang) | Compilers and programming languages |
+| [PyDB](https://github.com/robcox2910/pydb) | Relational databases |
+| [PyStack](https://github.com/robcox2910/pystack) | Full-stack integration |
+| [PyWeb](https://github.com/robcox2910/pyweb) | HTTP web servers |
+| [PyGit](https://github.com/robcox2910/pygit) | Version control |
+| [PyNet](https://github.com/robcox2910/pynet) | Networking |
+| [PySearch](https://github.com/robcox2910/pysearch) | Full-text search |
+| [PyMQ](https://github.com/robcox2910/pymq) | Message queues |
 
 ## License
 
