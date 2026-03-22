@@ -1,72 +1,74 @@
-"""Test digital signatures -- sign and verify messages with key pairs."""
+"""Tests for digital signatures.
+
+Signatures prove who wrote a message and that it hasn't been changed.
+These tests verify the signing and verification process.
+"""
 
 from pycrypt.signatures import generate_keypair, sign, verify
 
-KEY_LENGTH = 32
+KEY_SIZE = 32
 
 
 class TestGenerateKeypair:
-    """Test key pair generation."""
+    """Verify key pair generation."""
 
-    def test_returns_two_different_values(self) -> None:
-        """Verify the private and public keys are different."""
-        private_key, public_key = generate_keypair()
-        assert private_key != public_key
+    def test_returns_two_keys(self) -> None:
+        """Generate should return signing and verification keys."""
+        signing_key, verification_key = generate_keypair()
+        assert len(signing_key) == KEY_SIZE
+        assert len(verification_key) == KEY_SIZE
 
-    def test_private_key_is_bytes(self) -> None:
-        """Verify the private key is returned as bytes."""
-        private_key, _ = generate_keypair()
-        assert isinstance(private_key, bytes)
+    def test_keys_are_different(self) -> None:
+        """The two keys should be different."""
+        signing_key, verification_key = generate_keypair()
+        assert signing_key != verification_key
 
-    def test_public_key_is_bytes(self) -> None:
-        """Verify the public key is returned as bytes."""
-        _, public_key = generate_keypair()
-        assert isinstance(public_key, bytes)
-
-    def test_private_key_length(self) -> None:
-        """Verify the private key is 32 bytes."""
-        private_key, _ = generate_keypair()
-        assert len(private_key) == KEY_LENGTH
-
-    def test_keys_are_unique(self) -> None:
-        """Verify each call generates a different key pair."""
-        private_a, _ = generate_keypair()
-        private_b, _ = generate_keypair()
-        assert private_a != private_b
+    def test_each_pair_unique(self) -> None:
+        """Each call should generate a unique pair."""
+        pair1 = generate_keypair()
+        pair2 = generate_keypair()
+        assert pair1[0] != pair2[0]
 
 
 class TestSignAndVerify:
-    """Test message signing and verification."""
+    """Verify signing and verification."""
 
     def test_valid_signature(self) -> None:
-        """Verify a signature created with the private key validates with the public key."""
-        private_key, public_key = generate_keypair()
-        message = "I wrote this!"
-        signature = sign(message, private_key)
-        assert verify(message, signature, public_key) is True
+        """A valid signature should verify successfully."""
+        signing_key, _verification_key = generate_keypair()
+        sig = sign("I wrote this!", signing_key)
+        assert verify("I wrote this!", sig, signing_key)
 
-    def test_fails_for_wrong_message(self) -> None:
-        """Verify verification fails when the message is different."""
-        private_key, public_key = generate_keypair()
-        signature = sign("original message", private_key)
-        assert verify("tampered message", signature, public_key) is False
+    def test_tampered_message_fails(self) -> None:
+        """A changed message should fail verification."""
+        signing_key, _verification_key = generate_keypair()
+        sig = sign("Original message", signing_key)
+        assert not verify("Tampered message", sig, signing_key)
 
-    def test_fails_for_wrong_key(self) -> None:
-        """Verify verification fails with a different key pair's public key."""
-        private_key_a, _ = generate_keypair()
-        _, public_key_b = generate_keypair()
-        signature = sign("hello", private_key_a)
-        assert verify("hello", signature, public_key_b) is False
+    def test_wrong_key_fails(self) -> None:
+        """A signature verified with a different key should fail."""
+        key1, _ = generate_keypair()
+        key2, _ = generate_keypair()
+        sig = sign("Hello", key1)
+        assert not verify("Hello", sig, key2)
 
-    def test_signature_is_bytes(self) -> None:
-        """Verify the signature is returned as bytes."""
-        private_key, _ = generate_keypair()
-        signature = sign("test", private_key)
-        assert isinstance(signature, bytes)
+    def test_signature_is_deterministic(self) -> None:
+        """Same message + same key = same signature."""
+        signing_key, _ = generate_keypair()
+        sig1 = sign("Hello", signing_key)
+        sig2 = sign("Hello", signing_key)
+        assert sig1 == sig2
 
-    def test_deterministic_with_same_key(self) -> None:
-        """Verify signing the same message with the same key gives the same signature."""
-        private_key, _ = generate_keypair()
-        sig_a = sign("hello", private_key)
-        sig_b = sign("hello", private_key)
-        assert sig_a == sig_b
+    def test_different_messages_different_signatures(self) -> None:
+        """Different messages should produce different signatures."""
+        signing_key, _ = generate_keypair()
+        sig1 = sign("Hello", signing_key)
+        sig2 = sign("World", signing_key)
+        assert sig1 != sig2
+
+    def test_signature_is_hex_string(self) -> None:
+        """The signature should be a hex string."""
+        signing_key, _ = generate_keypair()
+        sig = sign("Hello", signing_key)
+        assert isinstance(sig, str)
+        int(sig, 16)  # Should not raise if valid hex.

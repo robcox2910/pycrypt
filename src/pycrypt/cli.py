@@ -57,7 +57,7 @@ def _demo_hmac() -> None:
     sys.stdout.write(f"   Message: {message}\n")
     sys.stdout.write(f"   HMAC tag: {tag}\n")
     sys.stdout.write(f"   Verify original:  {hmac_verify(message, tag, key)}\n")
-    sys.stdout.write(f'   Verify tampered:  {hmac_verify("transfer $1000", tag, key)}\n\n')
+    sys.stdout.write(f"   Verify tampered:  {hmac_verify('transfer $1000', tag, key)}\n\n")
 
 
 def main() -> None:

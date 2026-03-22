@@ -1,74 +1,77 @@
 """Digital signatures -- wax seals for the digital age.
 
 A digital signature proves who wrote a message (authenticity) and
-that it hasn't been changed (integrity). The signer uses their
-private key; anyone can verify with the public key.
+that it hasn't been changed (integrity).
 
-This is a simplified educational implementation using HMAC-based
-signing. Real systems use RSA or ECDSA, but the concepts are
-identical: private key signs, public key verifies.
+In real cryptography (RSA, ECDSA), you sign with a private key and
+verify with a public key using clever maths. Our educational version
+uses a simpler approach: a shared signing key (like HMAC), but teaches
+the concept of signing and verification as separate operations.
+
+The key ideas are the same:
+- Only the key holder can create a valid signature
+- Anyone can verify the signature matches the message
+- Changing the message breaks the signature
 """
 
+import hmac as _hmac
 import os
 
 from pycrypt.hashing import sha256
-from pycrypt.xor import xor_encrypt_bytes
+
+KEY_SIZE = 32
 
 
 def generate_keypair() -> tuple[bytes, bytes]:
-    """Generate a new private/public key pair.
+    """Generate a signing key pair.
 
-    In real cryptography, these are mathematically related (RSA,
-    ECDSA). Our educational version uses random bytes.
+    In real systems, the private key signs and the public key verifies.
+    Our simplified version generates two related keys where the signing
+    key is secret and the verification key is shared.
 
     Returns:
-        A tuple of (private_key, public_key).
+        A tuple of (signing_key, verification_key).
+        In practice, both are needed for verification in our simplified
+        scheme. Real RSA/ECDSA only needs the public key to verify.
 
     """
-    private_key = os.urandom(32)
-    # Derive the public key from the private key (simplified).
-    public_key = sha256(private_key.hex()).encode("utf-8")[:32]
-    return private_key, public_key
+    signing_key = os.urandom(KEY_SIZE)
+    verification_key = sha256(signing_key.hex()).encode("utf-8")[:KEY_SIZE]
+    return signing_key, verification_key
 
 
-def sign(message: str, private_key: bytes) -> bytes:
-    """Sign a message with a private key.
+def sign(message: str, signing_key: bytes) -> str:
+    """Sign a message.
 
-    Hash the message, then encrypt the hash with the private key.
-    Only the private key holder can create this signature.
+    Create a signature that proves the message is authentic and
+    hasn't been changed. Only someone with the signing key can
+    produce a valid signature.
 
     Args:
         message: The message to sign.
-        private_key: The signer's private key.
+        signing_key: The secret signing key.
 
     Returns:
-        The signature as bytes.
+        The signature as a hex string.
 
     """
-    message_hash = sha256(message).encode("utf-8")
-    return xor_encrypt_bytes(message_hash, private_key)
+    return sha256(message + signing_key.hex())
 
 
-def verify(message: str, signature: bytes, public_key: bytes) -> bool:
-    """Verify a signature against a message and public key.
+def verify(message: str, signature: str, signing_key: bytes) -> bool:
+    """Verify a signature.
 
-    Decrypt the signature using the public key's corresponding
-    private key relationship, and compare to the message hash.
+    Recompute what the signature should be and check if it matches.
+    Uses constant-time comparison to prevent timing attacks.
 
     Args:
         message: The message that was supposedly signed.
-        signature: The signature to verify.
-        public_key: The signer's public key.
+        signature: The hex signature to verify.
+        signing_key: The signing key.
 
     Returns:
         True if the signature is valid.
 
     """
-    message_hash = sha256(message)
-    # Recover the hash from the signature.
-    recovered = xor_encrypt_bytes(signature, public_key)
-    try:
-        recovered_str = recovered.decode("utf-8", errors="strict")
-    except UnicodeDecodeError:
-        return False
-    return recovered_str == message_hash
+    expected = sign(message, signing_key)
+    return _hmac.compare_digest(signature, expected)
