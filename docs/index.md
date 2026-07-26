@@ -12,6 +12,12 @@ proving it hasn't been tampered with. Every time you visit a website
 with a padlock icon, send a message on WhatsApp, or pay with a credit
 card, cryptography is working behind the scenes.
 
+!!! warning "For learning, not real security"
+    PyCrypt exists to teach how these ideas work. The Caesar and XOR
+    ciphers and the shared-secret signatures here are easy to break --
+    never use them to protect real passwords, messages, or secrets.
+    For real projects, use a vetted library like `cryptography`.
+
 ## The Three Big Ideas
 
 ### 1. Hashing -- The Meat Grinder
@@ -21,7 +27,7 @@ reverse it (you can't un-grind meat), but the same input always gives
 the same fingerprint. Useful for checking if something changed.
 
 ```
-"Hello" → "2cf24dba5fb0a30e..."  (always the same)
+"Hello" → "185f8db32271fe25..."  (always the same)
 "Hello!" → "334d016f755cd6dc..."  (completely different)
 ```
 
@@ -38,8 +44,11 @@ can read it. There are two flavours:
 ### 3. Signing -- The Wax Seal
 
 A **digital signature** proves who wrote a message and that it wasn't
-changed. Like a wax seal on a letter -- you can see it's from the
-king, and you know no one opened it.
+changed. Like a wax seal on a letter -- you know it's genuine and that
+no one opened it. PyCrypt's version is a *shared* seal: you and your
+friend both hold the same secret key, so either of you can make the
+seal and check it. (Real systems use a private key to sign and a
+public key anyone can verify with -- more on that later.)
 
 ## Our Building Blocks
 

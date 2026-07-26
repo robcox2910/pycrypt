@@ -6,6 +6,7 @@ These tests verify the signing and verification process.
 
 import os
 
+from pycrypt.hmac import hmac_sign
 from pycrypt.signatures import sign, verify
 
 KEY_SIZE = 32
@@ -53,3 +54,8 @@ class TestSignAndVerify:
         sig = sign("Hello", key)
         assert isinstance(sig, str)
         int(sig, 16)  # Should not raise if valid hex.
+
+    def test_signature_is_hmac(self) -> None:
+        """The signature is an HMAC tag over the message (not homemade)."""
+        key = os.urandom(KEY_SIZE)
+        assert sign("Hello", key) == hmac_sign("Hello", key.hex())

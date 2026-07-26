@@ -1,6 +1,14 @@
 # PyCrypt
 
-**An educational cryptography library built from scratch in Python.**
+**An educational cryptography library in plain Python.** The classic
+ciphers (Caesar, XOR) are built from scratch; the modern primitives
+(SHA-256, HMAC, PBKDF2) wrap Python's battle-tested `hashlib`/`hmac`
+standard library so you can see how the pieces fit together.
+
+> ⚠️ **For LEARNING, not real security.** The Caesar and XOR ciphers
+> and the homemade-style signatures here are easy to break. Never use
+> PyCrypt to protect real passwords, messages, or secrets -- use a
+> vetted library like `cryptography` for that.
 
 ## What Is Cryptography?
 
@@ -84,20 +92,24 @@ print(hmac_verify("transfer $10", tag, key="shared-secret"))   # True
 print(hmac_verify("transfer $1000", tag, key="shared-secret"))  # False!
 ```
 
-### Digital Signatures -- Proving Who Wrote It
+### Digital Signatures -- A Shared Wax Seal
 
 A digital signature proves who wrote a message and that it hasn't been
-changed. The signer uses their private key; anyone can verify with the
-public key.
+changed. Our version is like a wax seal that only you and your friend
+know how to make: you both share one secret key, and that same key is
+used to sign *and* to verify. (Real systems like RSA use a separate
+private key to sign and a public key anyone can verify with.)
 
 ```python
-from pycrypt.signatures import generate_keypair, sign, verify
+import os
+from pycrypt.signatures import sign, verify
 
-private_key, public_key = generate_keypair()
+# You and your friend share this one secret key.
+key = os.urandom(32)
 
-signature = sign("I wrote this!", private_key)
-print(verify("I wrote this!", signature, public_key))   # True
-print(verify("I didn't write this", signature, public_key))  # False
+signature = sign("I wrote this!", key)
+print(verify("I wrote this!", signature, key))       # True
+print(verify("I didn't write this", signature, key))  # False
 ```
 
 ## Features
@@ -107,8 +119,8 @@ print(verify("I didn't write this", signature, public_key))  # False
 - **XOR Cipher** -- Symmetric encryption using bitwise XOR
 - **Key Derivation** -- Turn passwords into strong keys with PBKDF2
 - **HMAC** -- Tamper-proof message authentication codes
-- **Digital Signatures** -- Sign and verify messages with key pairs
-- **CLI Tool** -- Interactive demos of every concept
+- **Digital Signatures** -- Sign and verify messages with a shared secret key
+- **CLI Tool** -- A demo that prints hashing, Caesar, XOR, and HMAC examples
 - **100% Typed** -- Full type annotations with strict Pyright checking
 
 ## Quick Start
