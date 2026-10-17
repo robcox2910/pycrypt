@@ -38,9 +38,20 @@ plaintext = plaintext_bytes.decode("utf-8")  # "Hello!"
 
 ## Why XOR Matters
 
-XOR is the foundation of almost all modern encryption. AES, ChaCha20,
+XOR is a building block inside almost all modern encryption. AES, ChaCha20,
 and other real ciphers use XOR at their core. The difference is in how
 they generate the key stream.
+
+## Why Our XOR Is For Learning Only
+
+Our key is short and **repeats**: "key" becomes "keykeykey..." to cover a
+long message. Repeating patterns are a codebreaker's best friend. If you can
+guess even a little of the message -- most letters start with "Dear" --
+XOR-ing your guess with the secret text reveals that part of the key, and
+because the key repeats, it unlocks the same spots all the way through.
+
+Real ciphers avoid this by generating a key stream that is as long as the
+message and never repeats. That's the clever (and hard) part we skip here.
 
 ## What We Test
 
