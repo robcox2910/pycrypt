@@ -66,7 +66,8 @@ for shift, text in brute_force(secret):
 ### XOR Cipher -- Flipping Switches
 
 XOR is its own inverse -- encrypt and decrypt use the exact same operation.
-This is the foundation of modern encryption.
+Real ciphers like AES use XOR inside, but a short repeating key like ours is
+easy to break -- **for learning only**.
 
 ```python
 from pycrypt.xor import xor_encrypt, xor_encrypt_bytes
