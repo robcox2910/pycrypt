@@ -4,8 +4,9 @@ A hash function is like a meat grinder: put any data in, get a
 fixed-size fingerprint out. You can't reverse it, but the same input
 always gives the same fingerprint.
 
-We implement SHA-256 (used by Bitcoin, TLS, and most of the internet)
-using Python's hashlib.
+We use SHA-256 (used by Bitcoin, TLS, and most of the internet) from
+Python's built-in ``hashlib``. Writing SHA-256 itself from scratch is a
+big project of its own -- here we focus on what hashes are *for*.
 """
 
 import hashlib

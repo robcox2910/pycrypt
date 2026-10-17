@@ -6,7 +6,7 @@ from pycrypt.caesar import decrypt as caesar_decrypt
 from pycrypt.caesar import encrypt as caesar_encrypt
 from pycrypt.hashing import sha256
 from pycrypt.hmac import hmac_sign, hmac_verify
-from pycrypt.xor import xor_encrypt
+from pycrypt.xor import xor_decrypt, xor_encrypt
 
 CAESAR_SHIFT = 3
 SEPARATOR = "-" * 50
@@ -42,9 +42,10 @@ def _demo_xor() -> None:
     message = "secret"
     key = "mykey"
     encrypted = xor_encrypt(message, key)
-    sys.stdout.write(f'   xor_encrypt("{message}", "{key}") = {encrypted.hex()}\n')
-    decrypted = xor_encrypt(message, key)
-    sys.stdout.write(f"   XOR is symmetric: encrypt again = {decrypted.hex()}\n\n")
+    decrypted = xor_decrypt(encrypted, key)
+    sys.stdout.write(f"   Plaintext:  {message}\n")
+    sys.stdout.write(f'   Encrypted:  {encrypted.hex()}  (key "{key}")\n')
+    sys.stdout.write(f"   Decrypted:  {decrypted}  (XOR again with the same key)\n\n")
 
 
 def _demo_hmac() -> None:
