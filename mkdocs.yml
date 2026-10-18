@@ -47,6 +47,7 @@ nav:
   - Key Derivation: concepts/key-derivation.md
   - Digital Signatures: concepts/signatures.md
   - XOR Cipher: concepts/xor.md
+  - Property Testing: property-testing.md
   # series-nav:start
   - The series:
       - Series home: https://robcox2910.github.io/
