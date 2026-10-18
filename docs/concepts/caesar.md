@@ -38,7 +38,8 @@ under a second. Real encryption needs keys that are much, much longer.
 
 - Encrypting shifts letters correctly.
 - Decrypting reverses the shift.
-- Non-letter characters (spaces, numbers) are left unchanged.
+- Non-letter characters (spaces, numbers) are left unchanged, and so are
+  letters from other alphabets, like À.
 - Wrapping works (Z + 1 = A).
 
 ## Next Up

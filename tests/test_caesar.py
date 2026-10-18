@@ -35,6 +35,11 @@ class TestCaesarEncrypt:
         result = encrypt("ABC 123", SHIFT_3)
         assert result == "DEF 123"
 
+    def test_accented_letters_preserved(self) -> None:
+        """Verify letters outside A-Z, like À, are left unchanged (found by Hypothesis)."""
+        result = encrypt("À", 0)
+        assert result == "À"
+
 
 class TestCaesarDecrypt:
     """Test Caesar cipher decryption."""
@@ -52,6 +57,10 @@ class TestCaesarDecrypt:
         assert encrypted == "ABC"
         decrypted = decrypt(encrypted, SHIFT_3)
         assert decrypted == "XYZ"
+
+    def test_round_trip_accented_letter(self) -> None:
+        """Verify a letter outside A-Z, like À, survives the round trip (found by Hypothesis)."""
+        assert decrypt(encrypt("À", SHIFT_3), SHIFT_3) == "À"
 
 
 class TestBruteForce:
