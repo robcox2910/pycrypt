@@ -109,7 +109,7 @@ ALPHABET_SIZE = 25  # was 26
 Run the property tests:
 
 ```bash
-uv run pytest tests/test_properties.py -q --no-cov -p no:randomly
+uv run pytest tests/test_properties.py --no-cov
 ```
 
 Hypothesis reports this (trimmed to the interesting part):
@@ -147,6 +147,10 @@ more property fails, for a different reason: with a 25-letter alphabet,
 a shift of -25 is a whole lap, so `test_caesar_moves_every_english_letter`
 finds that `A` stays `A`.) Each property guards a different rule, which
 is why we keep all of them.
+
+The example tests also catch this bug: four of them fail. So the property
+isn't the only alarm here. What it added is the smallest input, one letter
+and a shift of zero, instead of four failures to read through.
 
 Now put the line back to `ALPHABET_SIZE = 26` and run the tests again.
 They pass.
@@ -210,8 +214,8 @@ uv run pytest tests/test_properties.py --no-cov
 The `--no-cov` turns off the coverage check, which expects the *whole*
 test suite to run and would fail on one file.
 
-Run them the long way (2,000 random examples each, different every
-run) to hunt for rarer bugs:
+Run them the long way (2,000 random examples each, different every run)
+to hunt for rarer bugs. It takes about 30 seconds:
 
 ```bash
 uv run pytest tests/test_properties.py --no-cov --hypothesis-profile=thorough
@@ -220,11 +224,12 @@ uv run pytest tests/test_properties.py --no-cov --hypothesis-profile=thorough
 The normal run uses a fixed seed, so it tries the same inputs every time
 and a passing build means the same thing on every computer. The thorough
 run is random, so each time you run it the robot cuts brand-new keys.
+Both settings live in `conftest.py` at the top of the project.
 
-## Next Up
+## Your Turn
 
-Try writing your own property. A good place to start is
+Can you write your own property? A good place to start is
 [Hashing](concepts/hashing.md): "whatever text you hash, the SHA-256
 fingerprint is always 64 characters long". What's the strategy? What's
-the `assert`? Then break `sha256` on purpose and see what Hypothesis
-shrinks it to.
+the `assert`? Can you break `sha256` on purpose and see what Hypothesis
+shrinks it to?
