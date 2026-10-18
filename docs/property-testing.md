@@ -71,13 +71,21 @@ Notice what the test *doesn't* say. It never says "HELLO with shift 3
 should be KHOOR". It doesn't need to know any answers. It only needs a
 rule that's always true.
 
-PyCrypt has six more properties, using the same idea:
+There's a catch, though. A "cipher" that does nothing at all -- hand back
+the message unchanged -- passes every round-trip, because doing nothing
+twice still gives you what you started with. **A round-trip alone is
+passed by doing nothing**, so each cipher also gets a property that says
+it really scrambles something.
+
+PyCrypt has eight more properties, using the same ideas:
 
 | Rule | Test |
 |---|---|
 | XOR-ing any bytes twice with the same key gives them back | `test_xor_bytes_round_trip` |
+| With no zero bytes in the key, XOR changes every byte of the message | `test_xor_changes_every_byte` |
 | XOR decrypts any text back to exactly what you encrypted | `test_xor_text_round_trip` |
-| Caesar only moves A-Z and a-z, keeps their case, and leaves everything else alone | `test_caesar_moves_only_english_letters` |
+| Caesar only changes A-Z and a-z, keeps their case, and leaves everything else alone | `test_caesar_leaves_everything_else_alone` |
+| Unless the shift is a whole number of laps (0, 26, 52...), Caesar changes every A-Z and a-z letter | `test_caesar_moves_every_english_letter` |
 | Our HMAC tag is the same one Python's own `hmac` module makes | `test_hmac_tag_matches_standard_library` |
 | A message always passes the check with its own tag | `test_hmac_accepts_its_own_tag` |
 | Sneak anything into a signed message, anywhere, and the check fails | `test_hmac_rejects_tampered_message` |
@@ -132,6 +140,14 @@ of the alphabet and wrapped round to the start.
 The note `# or any other generated value` means the shift doesn't matter:
 every shift fails for `Z`. So the bug is about the letter, not the shift.
 
+It's the round-trip that catches `Z` turning into `A`.
+`test_caesar_leaves_everything_else_alone` stays green, because a capital
+letter turning into another capital letter is allowed by its rule. (One
+more property fails, for a different reason: with a 25-letter alphabet,
+a shift of -25 is a whole lap, so `test_caesar_moves_every_english_letter`
+finds that `A` stays `A`.) Each property guards a different rule, which
+is why we keep all of them.
+
 Now put the line back to `ALPHABET_SIZE = 26` and run the tests again.
 They pass.
 
@@ -162,7 +178,7 @@ Here's why. The old code decided whether a character was a letter by
 asking Python `char.isupper()`. That's true for `A` to `Z`... but it's
 also true for `À`, `É`, `Σ` and thousands of other capital letters from
 other alphabets. The code then did its A-to-Z arithmetic on `À`, which
-isn't in A-to-Z at all, and landed on a random English letter. No shift
+isn't in A-to-Z at all, and landed on some unrelated English letter. No shift
 could ever bring it back.
 
 The example tests all used messages like `"HELLO WORLD"`. Nobody thought
@@ -188,14 +204,17 @@ someone deletes the property.
 Run just the property tests (100 examples each, the same every time):
 
 ```bash
-uv run pytest tests/test_properties.py
+uv run pytest tests/test_properties.py --no-cov
 ```
+
+The `--no-cov` turns off the coverage check, which expects the *whole*
+test suite to run and would fail on one file.
 
 Run them the long way (2,000 random examples each, different every
 run) to hunt for rarer bugs:
 
 ```bash
-uv run pytest tests/test_properties.py --hypothesis-profile=thorough
+uv run pytest tests/test_properties.py --no-cov --hypothesis-profile=thorough
 ```
 
 The normal run uses a fixed seed, so it tries the same inputs every time
