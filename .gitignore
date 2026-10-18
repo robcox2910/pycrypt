@@ -11,3 +11,4 @@ htmlcov/
 .DS_Store
 src/pycrypt/_version.py
 site/
+.hypothesis/

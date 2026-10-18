@@ -3,6 +3,10 @@
 The simplest cipher: shift every letter by a fixed number. A becomes
 D (shift 3), B becomes E, and so on. It wraps around: X becomes A.
 
+Only the 26 letters of the English alphabet move. Everything else --
+spaces, digits, punctuation, and letters from other alphabets like
+"À" or "Σ" -- is left exactly as it was.
+
 This is easy to break (only 26 possible shifts) but it's the perfect
 starting point for understanding encryption.
 """
@@ -15,12 +19,13 @@ LOWER_A = ord("a")
 def encrypt(plaintext: str, shift: int) -> str:
     """Encrypt a message using the Caesar cipher.
 
-    Shift each letter by the given amount. Non-letter characters
-    (spaces, numbers, punctuation) are left unchanged.
+    Shift each letter A-Z (or a-z) by the given amount. Everything else
+    (spaces, numbers, punctuation, accented letters) is left unchanged.
 
     Args:
         plaintext: The message to encrypt.
-        shift: How many positions to shift (1-25).
+        shift: How many positions to shift. Any whole number works:
+            27 does the same as 1, and -1 the same as 25.
 
     Returns:
         The encrypted message.
@@ -28,10 +33,10 @@ def encrypt(plaintext: str, shift: int) -> str:
     """
     result: list[str] = []
     for char in plaintext:
-        if char.isupper():
+        if "A" <= char <= "Z":
             shifted = (ord(char) - UPPER_A + shift) % ALPHABET_SIZE
             result.append(chr(shifted + UPPER_A))
-        elif char.islower():
+        elif "a" <= char <= "z":
             shifted = (ord(char) - LOWER_A + shift) % ALPHABET_SIZE
             result.append(chr(shifted + LOWER_A))
         else:
