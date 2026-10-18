@@ -28,6 +28,9 @@ from pycrypt.xor import xor_decrypt, xor_encrypt, xor_encrypt_bytes
 
 # --- Strategies: recipes for random inputs -----------------------------------
 
+LETTERS_IN_ALPHABET = len(string.ascii_uppercase)
+LARGEST_BYTE = 255
+
 
 def any_text() -> st.SearchStrategy[str]:
     """Make any text at all: empty, emoji, accents, spaces, Chinese, the lot."""
@@ -57,6 +60,27 @@ def any_shift() -> st.SearchStrategy[int]:
     return st.integers()
 
 
+def shift_of(laps: int, step: int) -> int:
+    """Return a shift that goes round the alphabet ``laps`` times, then ``step`` more."""
+    return laps * LETTERS_IN_ALPHABET + step
+
+
+def moving_shifts() -> st.SearchStrategy[int]:
+    """Make any shift except a whole number of laps (0, 26, -52...), which moves nothing."""
+    return st.builds(
+        shift_of,
+        laps=st.integers(),
+        step=st.integers(min_value=1, max_value=LETTERS_IN_ALPHABET - 1),
+    )
+
+
+def nonzero_byte_keys() -> st.SearchStrategy[bytes]:
+    """Make a key of raw bytes where no byte is zero."""
+    # XOR-ing with a zero byte leaves a byte as it was, so only non-zero
+    # key bytes are sure to flip something.
+    return st.lists(st.integers(min_value=1, max_value=LARGEST_BYTE), min_size=1).map(bytes)
+
+
 def extra_text() -> st.SearchStrategy[str]:
     """Make at least one character to sneak into a message."""
     return st.text(min_size=1)
@@ -77,6 +101,15 @@ def test_xor_bytes_round_trip(data: bytes, key: bytes) -> None:
     assert xor_encrypt_bytes(scrambled, key) == data
 
 
+@given(data=any_bytes(), key=nonzero_byte_keys())
+def test_xor_changes_every_byte(data: bytes, key: bytes) -> None:
+    """With no zero bytes in the key, every byte of the message comes out different."""
+    scrambled = xor_encrypt_bytes(data, key)
+    assert len(scrambled) == len(data)
+    for before, after in zip(data, scrambled, strict=True):
+        assert after != before
+
+
 @given(text=any_text(), key=text_keys())
 def test_xor_text_round_trip(text: str, key: str) -> None:
     """Decrypting with the same key gives back exactly the text you encrypted."""
@@ -93,8 +126,8 @@ def test_caesar_round_trip(text: str, shift: int) -> None:
 
 
 @given(text=any_text(), shift=any_shift())
-def test_caesar_moves_only_english_letters(text: str, shift: int) -> None:
-    """Only A-Z and a-z move; they keep their case, and everything else stays put."""
+def test_caesar_leaves_everything_else_alone(text: str, shift: int) -> None:
+    """Only A-Z and a-z can change; they keep their case, and everything else stays put."""
     secret = encrypt(text, shift)
     assert len(secret) == len(text)
     for before, after in zip(text, secret, strict=True):
@@ -104,6 +137,15 @@ def test_caesar_moves_only_english_letters(text: str, shift: int) -> None:
             assert after in string.ascii_lowercase
         else:
             assert after == before
+
+
+@given(text=any_text(), shift=moving_shifts())
+def test_caesar_moves_every_english_letter(text: str, shift: int) -> None:
+    """Unless the shift is a whole number of laps, every A-Z and a-z letter changes."""
+    secret = encrypt(text, shift)
+    for before, after in zip(text, secret, strict=True):
+        if before in string.ascii_letters:
+            assert after != before
 
 
 # --- HMAC: the seal matches the standard library and breaks when tampered -----
