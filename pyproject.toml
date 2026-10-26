@@ -1,5 +1,5 @@
 [project]
-name = "pycrypt"
+name = "fromscratch-pycrypt"
 dynamic = ["version"]
 description = "An educational cryptography library built from scratch in Python"
 readme = "README.md"
