@@ -61,6 +61,14 @@ public key anyone can verify with -- more on that later.)
 | **HMAC** | Tamper-evident seal | Prove a message wasn't changed |
 | **Digital Signatures** | Wax seal on a letter | Prove who sent it |
 
+## Install
+
+```bash
+pip install fromscratch-pycrypt
+```
+
+Or get the whole series at once with `pip install fromscratch-pystack`. To read the code or run the tests, clone it from [GitHub](https://github.com/robcox2910/pycrypt).
+
 ## Let's Start!
 
 Head to [Hashing](concepts/hashing.md) to learn how fingerprints
