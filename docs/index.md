@@ -1,4 +1,8 @@
-# What Is Cryptography?
+---
+title: "Build your own cryptography toolkit in Python"
+---
+
+# PyCrypt: Build your own cryptography toolkit in Python
 
 ## Secret Messages and Tamper-Proof Seals
 
