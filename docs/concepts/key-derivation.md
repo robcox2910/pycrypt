@@ -31,6 +31,19 @@ password + salt1 → key_A
 password + salt2 → key_B  (different key, same password!)
 ```
 
+## Rounds: Making Guessing Slow
+
+PBKDF2 seals the password and salt with [HMAC](hmac.md), then seals the
+result again, and again, for many **rounds**, mixing every result
+together. One check takes a moment for you, but someone trying millions
+of guesses has to pay that cost millions of times.
+
+Real systems use hundreds of thousands of rounds (OWASP recommends
+600,000 for PBKDF2-HMAC-SHA256), because they run the hash in fast C
+code. PyCrypt's version is plain Python you can read, which is around a
+hundred times slower, so its default is 1,000 rounds. Try 10,000 and you
+can feel the slowness that protects real passwords.
+
 ## How It Works in PyCrypt
 
 ```python
@@ -50,6 +63,8 @@ assert key == same_key
 - Same password + different salt = different key.
 - The derived key is the requested length.
 - More rounds produce a different key.
+- Keys match the published PBKDF2-HMAC-SHA256 answers, and Python's own
+  `hashlib.pbkdf2_hmac` for any password, salt, round count and length.
 
 ## Next Up
 

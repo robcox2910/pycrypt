@@ -14,6 +14,7 @@ named for what it makes.
 See ``docs/property-testing.md`` for the walk-through.
 """
 
+import hashlib
 import hmac as stdlib_hmac
 import string
 
@@ -23,7 +24,9 @@ from hypothesis import strategies as st
 
 from pycrypt.caesar import decrypt, encrypt
 from pycrypt.errors import VerificationError
-from pycrypt.hmac import hmac_sign, hmac_verify, hmac_verify_or_raise
+from pycrypt.hashing import md5_digest, sha256_digest
+from pycrypt.hmac import hmac_sha256, hmac_sign, hmac_verify, hmac_verify_or_raise
+from pycrypt.kdf import pbkdf2_hmac_sha256
 from pycrypt.xor import xor_decrypt, xor_encrypt, xor_encrypt_bytes
 
 # --- Strategies: recipes for random inputs -----------------------------------
@@ -175,3 +178,42 @@ def test_hmac_rejects_tampered_message(message: str, key: str, extra: str, posit
     assert not hmac_verify(tampered, tag, key)
     with pytest.raises(VerificationError):
         hmac_verify_or_raise(tampered, tag, key)
+
+
+# --- Hand-written hashes agree with Python's own -----------------------------
+#
+# PyCrypt writes SHA-256, MD5, HMAC and PBKDF2 itself. Python's hashlib and
+# hmac modules are the answer key: for any input at all, ours must match.
+
+MAX_TEST_ROUNDS = 5
+MAX_TEST_KEY_LENGTH = 100  # Over three blocks of SHA-256 output.
+
+
+@given(any_bytes())
+def test_sha256_matches_hashlib(data: bytes) -> None:
+    """Our SHA-256 gives the same fingerprint as Python's, for any bytes."""
+    assert sha256_digest(data) == hashlib.sha256(data).digest()
+
+
+@given(any_bytes())
+def test_md5_matches_hashlib(data: bytes) -> None:
+    """Our MD5 gives the same fingerprint as Python's, for any bytes."""
+    assert md5_digest(data) == hashlib.md5(data).digest()  # noqa: S324
+
+
+@given(st.binary(max_size=200), any_bytes())
+def test_hmac_bytes_match_standard_library(key: bytes, message: bytes) -> None:
+    """Our HMAC matches Python's for any key, including keys longer than a block."""
+    assert hmac_sha256(key, message) == stdlib_hmac.digest(key, message, "sha256")
+
+
+@given(
+    any_bytes(),
+    any_bytes(),
+    st.integers(min_value=1, max_value=MAX_TEST_ROUNDS),
+    st.integers(min_value=1, max_value=MAX_TEST_KEY_LENGTH),
+)
+def test_pbkdf2_matches_hashlib(password: bytes, salt: bytes, rounds: int, length: int) -> None:
+    """Our PBKDF2 matches Python's for any password, salt, round count and length."""
+    expected = hashlib.pbkdf2_hmac("sha256", password, salt, rounds, dklen=length)
+    assert pbkdf2_hmac_sha256(password, salt, rounds, length) == expected

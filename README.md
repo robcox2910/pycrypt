@@ -1,9 +1,10 @@
 # PyCrypt
 
-**An educational cryptography library in plain Python.** The classic
-ciphers (Caesar, XOR) are built from scratch; the modern primitives
-(SHA-256, HMAC, PBKDF2) wrap Python's battle-tested `hashlib`/`hmac`
-standard library so you can see how the pieces fit together.
+**An educational cryptography library in plain Python.** Everything is
+built from scratch so you can read it: the classic ciphers (Caesar, XOR)
+and the modern building blocks (SHA-256, MD5, HMAC and PBKDF2). The tests
+check every answer against Python's own `hashlib` and `hmac`, and against
+the official test vectors from each standard.
 
 > ⚠️ **For LEARNING, not real security.** The Caesar and XOR ciphers
 > and the homemade-style signatures here are easy to break. Never use

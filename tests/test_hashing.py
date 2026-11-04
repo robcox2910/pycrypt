@@ -1,9 +1,53 @@
 """Test the hashing module -- SHA-256 and MD5 fingerprints."""
 
-from pycrypt.hashing import md5, sha256, sha256_bytes
+import pytest
+
+from pycrypt.hashing import md5, md5_digest, sha256, sha256_bytes, sha256_digest
 
 SHA256_HEX_LENGTH = 64
 MD5_HEX_LENGTH = 32
+SHA256_DIGEST_BYTES = 32
+MD5_DIGEST_BYTES = 16
+
+# Official answers from the standards, so we know the hand-written
+# versions match everyone else's SHA-256 and MD5 exactly.
+NIST_SHA256_VECTORS = [
+    (b"", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"),
+    (b"abc", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"),
+    (
+        b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+        "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
+    ),
+]
+RFC1321_MD5_VECTORS = [
+    (b"", "d41d8cd98f00b204e9800998ecf8427e"),
+    (b"a", "0cc175b9c0f1b6a831c399e269772661"),
+    (b"abc", "900150983cd24fb0d6963f7d28e17f72"),
+    (b"message digest", "f96b697d7cb7938d525a2f31aaf161d0"),
+    (
+        b"12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+        "57edf4a22be3c955ac49da2e2107b67a",
+    ),
+]
+
+
+class TestOfficialVectors:
+    """Check the hand-written hashes against the published answers."""
+
+    @pytest.mark.parametrize(("message", "expected"), NIST_SHA256_VECTORS)
+    def test_sha256_matches_nist(self, message: bytes, expected: str) -> None:
+        """Verify SHA-256 gives NIST's answer for each test message."""
+        assert sha256_digest(message).hex() == expected
+
+    @pytest.mark.parametrize(("message", "expected"), RFC1321_MD5_VECTORS)
+    def test_md5_matches_rfc1321(self, message: bytes, expected: str) -> None:
+        """Verify MD5 gives RFC 1321's answer for each test message."""
+        assert md5_digest(message).hex() == expected
+
+    def test_digest_sizes(self) -> None:
+        """Verify SHA-256 makes 32 bytes and MD5 makes 16."""
+        assert len(sha256_digest(b"x")) == SHA256_DIGEST_BYTES
+        assert len(md5_digest(b"x")) == MD5_DIGEST_BYTES
 
 
 class TestSha256:
