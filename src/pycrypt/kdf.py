@@ -19,9 +19,9 @@ trying millions of possible passwords has to do millions of times the work.
 
 Our default is only 1,000 rounds. Real systems use hundreds of thousands
 (OWASP recommends 600,000 for PBKDF2-HMAC-SHA256), but they run the hash
-in fast C code. PyCrypt's SHA-256 is plain Python you can read, which is
-around a hundred times slower, so 1,000 rounds already takes about half a
-second. Try ``rounds=10_000`` and feel the slowness that protects real
+in fast C code. PyCrypt's SHA-256 is plain Python you can read, which makes
+key derivation several hundred times slower, so 1,000 rounds already takes
+about half a second. Try ``rounds=10_000`` and feel the slowness that protects real
 passwords.
 """
 

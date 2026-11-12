@@ -40,7 +40,7 @@ of guesses has to pay that cost millions of times.
 
 Real systems use hundreds of thousands of rounds (OWASP recommends
 600,000 for PBKDF2-HMAC-SHA256), because they run the hash in fast C
-code. PyCrypt's version is plain Python you can read, which is around a
+code. PyCrypt's version is plain Python you can read, which is several
 hundred times slower, so its default is 1,000 rounds. Try 10,000 and you
 can feel the slowness that protects real passwords.
 
